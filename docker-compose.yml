@@ -17,13 +17,15 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       MONGO_HOST: mongodb
       MONGO_PORT: 27017
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
 
   mysql:
     image: mysql:5
     restart: always
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./db-init/:/docker-entrypoint-initdb.d
+      - /c/Users:/docker-entrypoint-initdb.d
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -35,17 +37,19 @@ services:
     restart: always
     volumes:
       - mongodb-data:/data/db
-      - ./db-init/:/docker-entrypoint-initdb.d
+      - /c/Users:/docker-entrypoint-initdb.d
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
 
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6379:6379
 
 volumes:
   mysql-data:
