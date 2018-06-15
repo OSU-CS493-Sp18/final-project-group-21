@@ -69,17 +69,25 @@ router.post('/', rateLimit, requireAuthentication, function(req, res, next) {
   }
   else {
     if( validation.validateAgainstSchema(req.body, reviewSchema) ) {
-      insertReview(mysqlPool, req.body, req.body.userid)
-        .then( (id) => {
-          res.status(201).json({
-            id: id
-            // links: { review: `/reviews/${id}`}
-          });
+      checkForDuplicateReview(mysqlPool, req.body.type, req.body.userid, req.body.businessid)
+        .then( (count) => {
+          if(count) {
+            res.status(500).json({ error: "Error already reviewed this business" });
+          }
+          else {
+            insertReview(mysqlPool, req.body, req.body.userid)
+              .then( (id) => {
+                res.status(201).json({
+                  id: id
+                  // links: { review: `/reviews/${id}`}
+                });
+              })
+              .catch( (err) => {
+                console.log("err ", err);
+                res.status(500).json({ error: "Error inserting review into DB.  Please try again later." });
+              });
+          }
         })
-        .catch( (err) => {
-          console.log("err ", err);
-          res.status(500).json({ error: "Error inserting review into DB.  Please try again later." });
-        });
     }
     else {
       res.status(400).json({ error: "Request body is not a valid review object." });
@@ -209,10 +217,22 @@ router.get('/:type/:id', rateLimit, requireAuthentication, function(req, res, ne
   // }
 
 });
-
 /////////////////////////////////////////////////////////////////// get businessreviews by id
 
 
+/////////////////////////////////////////////////////////////////// check if review already exists for business by user
+function checkForDuplicateReview(mysqlPool, type, userid, businessid) {
 
+  return new Promise( (resolve, reject) => {
+    mysqlPool.query('SELECT COUNT(*) AS count FROM Reviews WHERE type = ? AND userid = ? AND businessid = ?', [ type, userid, businessid ],
+                    function( err, result) {
+                      if(err) { reject(err); }
+                      else    { resolve(result[0].count); }
+                    });
+  });
+}
+
+
+/////////////////////////////////////////////////////////////////// check if review already exists for business by user
 
 exports.router = router;
