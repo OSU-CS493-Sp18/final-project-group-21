@@ -29,7 +29,7 @@ function getReviews(mysqlPool) {
   });
 };
 
-router.get('/', rateLimit, function (req, res, next) {
+router.get('/', function (req, res, next) {
   const mysqlPool = req.app.locals.mysqlPool;
 
   getReviews(mysqlPool)

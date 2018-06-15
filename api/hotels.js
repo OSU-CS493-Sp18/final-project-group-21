@@ -36,7 +36,7 @@ function getHotels(mysqlPool) {
   });
 };
 
-router.get('/', rateLimit, function (req, res, next) {
+router.get('/', function (req, res, next) {
   const mysqlPool = req.app.locals.mysqlPool;
 
   getHotels(mysqlPool)
@@ -192,6 +192,42 @@ router.delete('/:user/:hotelID', rateLimit, requireAuthentication, function( req
   }
 });
 /////////////////////////////////////////////////////////////////// DELETE HOTELS
+
+
+/////////////////////////////////////////////////////////////////// get hotel by id and reviews
+function getHotelById(mysqlPool, id) {
+  return new Promise(function(resolve, reject) {
+    // mysqlPool.query('SELECT * FROM Hotels B, Reviews R WHERE B.id = ? AND R.businessid = ? AND R.type = ?', [ id, id, type],
+    mysqlPool.query('SELECT userid, rating, cost, review FROM Reviews WHERE businessid = ? AND type = "h"', [ id],
+                    function(err, result) {
+                      if(err) { reject(err); }
+                      else    { resolve({hotel reviews: result }); }
+                    })
+  });
+}
+
+router.get('/h/:id', function(req, res, next) {
+  const mysqlPool = req.app.locals.mysqlPool;
+
+  var id = parseInt(req.params.id);
+  // var type = req.params.type;
+
+  getHotelById(mysqlPool, id)
+    .then( (hotelInfo) => {
+      if(hotelInfo) {
+        res.status(200).json( hotelInfo );
+      }
+      else { next(); }
+    })
+    .catch( (err) => {
+      console.log("err: ", err);
+      res.status(500).json({
+        error: "Unable to fetch hotel info.  Please try again later."
+      });
+    });
+});
+/////////////////////////////////////////////////////////////////// get hotel by id and reviews
+
 
 
 exports.router = router;
