@@ -29,7 +29,7 @@ CREATE TABLE `Hotels` (
   `city` varchar(255) NOT NULL,
   `state` char(2) NOT NULL,
   `zip` char(5) NOT NULL,
-  `phone` char(12) NOT NULL, 
+  `phone` char(12) NOT NULL,
   `website` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `ownerid` char(24) NOT NULL,
@@ -63,13 +63,13 @@ CREATE TABLE `Activities` (
   `city` varchar(255) NOT NULL,
   `state` char(2) NOT NULL,
   `zip` char(5) NOT NULL,
-  `phone` char(12) NOT NULL, 
+  `phone` char(12) NOT NULL,
   `website` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `ownerid` char(24) NOT NULL,
   `rating` float(2,1) DEFAULT NULL, /* these two will be populated by reviews */
   `cost` float(2,1) DEFAULT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -94,7 +94,7 @@ CREATE TABLE `Reviews` (
   `review` text,
   `userid` char(24) NOT NULL,
   `businessid` mediumint(9) NOT NULL,
-  CONSTRAINT PK_Reviews PRIMARY KEY (`id`, `category`)
+  CONSTRAINT PK_Reviews PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
