@@ -63,7 +63,7 @@ function insertHotel(mysqlPool, hotel) {
     mysqlPool.query('INSERT INTO Hotels SET ?', [ hotel ],
                     function(err, result) {
                       if(err) { reject(err); }
-                      else    { resolve(result.insertID); }
+                      else    { resolve(result.insertId); }
                     });
   });
 }
@@ -80,10 +80,12 @@ router.post('/', rateLimit, requireAuthentication, function(req, res, next) {
     if( validation.validateAgainstSchema(req.body, hotelSchema) ) {
       insertHotel(mysqlPool, req.body)
         .then( (id) => {
+          console.log("id: ", id);
           res.status(201).json({
+
             id: id,
             links: {
-              hotel: `/hotels/${id}`
+              hotel: `/hotels/h/${id}`
             }
           });
         })

@@ -63,7 +63,7 @@ function insertRestaurant(mysqlPool, restaurant) {
     mysqlPool.query('INSERT INTO Restaurants SET ?', [ restaurant ],
                     function(err, result) {
                       if(err) { reject(err); }
-                      else    { resolve(result.insertID); }
+                      else    { resolve(result.insertId); }
                     });
   });
 }
@@ -81,7 +81,7 @@ router.post('/', rateLimit, requireAuthentication, function(req, res, next) {
         .then( (id) => {
           res.status(201).json({
             id: id,
-            links: { restaurant: `/restaurants/${id}`}
+            links: { restaurant: `/restaurants/r/${id}`}
           });
         })
         .catch( (err) => {
