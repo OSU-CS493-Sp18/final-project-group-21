@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run --rm -it --network final-project-group-21_default mysql:5 mysql -h final-project-group-21_mysql_1 -u yalp -p
