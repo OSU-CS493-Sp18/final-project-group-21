@@ -187,7 +187,7 @@ function getRestaurantById(mysqlPool, type, id) {
     mysqlPool.query('SELECT userid, rating, cost, review FROM Reviews WHERE businessid = ? AND type = ?', [ id, type],
                     function(err, result) {
                       if(err) { reject(err); }
-                      else    { resolve({restaurant reviews: result }); }
+                      else    { resolve({reviews: result }); }
                     })
   });
 }
@@ -212,6 +212,8 @@ router.get('/:type/:id', function(req, res, next) {
       });
     });
 });
+
+
 /////////////////////////////////////////////////////////////////// get Restaurant by id and reviews
 
 exports.router = router;

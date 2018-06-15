@@ -201,7 +201,7 @@ function getHotelById(mysqlPool, id) {
     mysqlPool.query('SELECT userid, rating, cost, review FROM Reviews WHERE businessid = ? AND type = "h"', [ id],
                     function(err, result) {
                       if(err) { reject(err); }
-                      else    { resolve({hotel reviews: result }); }
+                      else    { resolve({reviews: result }); }
                     })
   });
 }
