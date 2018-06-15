@@ -36,7 +36,7 @@ function getRestaurants(mysqlPool) {
   });
 };
 
-router.get('/', rateLimit, function (req, res, next) {
+router.get('/', function (req, res, next) {
   const mysqlPool = req.app.locals.mysqlPool;
 
   getRestaurants(mysqlPool)
@@ -63,7 +63,7 @@ function insertRestaurant(mysqlPool, restaurant) {
     mysqlPool.query('INSERT INTO Restaurants SET ?', [ restaurant ],
                     function(err, result) {
                       if(err) { reject(err); }
-                      else    { resolve(result.insertID); }
+                      else    { resolve(result.insertId); }
                     });
   });
 }
@@ -76,11 +76,12 @@ router.post('/', rateLimit, requireAuthentication, function(req, res, next) {
   }
   else {
     if( validation.validateAgainstSchema(req.body, restaurantSchema) ) {
+      req.body.ownerid = req.user;
       insertRestaurant(mysqlPool, req.body)
         .then( (id) => {
           res.status(201).json({
             id: id,
-            links: { restaurant: `/restaurants/${id}`}
+            links: { restaurant: `/restaurants/r/${id}`}
           });
         })
         .catch( (err) => {
@@ -178,5 +179,41 @@ router.delete('/:user/:restaurantID', rateLimit, requireAuthentication, function
 });
 /////////////////////////////////////////////////////////////////// DELETE RestaurantS
 
+
+/////////////////////////////////////////////////////////////////// get Restaurant by id and reviews
+function getRestaurantById(mysqlPool, type, id) {
+  return new Promise(function(resolve, reject) {
+    // mysqlPool.query('SELECT * FROM Restaurants B, Reviews R WHERE B.id = ? AND R.businessid = ? AND R.type = ?', [ id, id, type],
+    mysqlPool.query('SELECT userid, rating, cost, review FROM Reviews WHERE businessid = ? AND type = ?', [ id, type],
+                    function(err, result) {
+                      if(err) { reject(err); }
+                      else    { resolve({reviews: result }); }
+                    })
+  });
+}
+
+router.get('/:type/:id', function(req, res, next) {
+  const mysqlPool = req.app.locals.mysqlPool;
+
+  var id = parseInt(req.params.id);
+  var type = req.params.type;
+
+  getRestaurantById(mysqlPool, type, id)
+    .then( (restaurantInfo) => {
+      if(restaurantInfo) {
+        res.status(200).json( restaurantInfo );
+      }
+      else { next(); }
+    })
+    .catch( (err) => {
+      console.log("err: ", err);
+      res.status(500).json({
+        error: "Unable to fetch restaurant info.  Please try again later."
+      });
+    });
+});
+
+
+/////////////////////////////////////////////////////////////////// get Restaurant by id and reviews
 
 exports.router = router;
