@@ -71,7 +71,13 @@ CREATE TABLE `Restaurants` (
 
 
 
-
+LOCK TABLES `Restaurants` WRITE;
+INSERT INTO `Restaurants` VALUES (NULL, "Lakeside Grill", "123 The Lake Court", "Corvallis", "OR", "97330", "1231231234", "thelake.com", NULL, "123123", 4.0, 2.5);
+INSERT INTO `Restaurants`VALUES (NULL, "Fire and Water", "123 Opposites Drive", "Corvallis", "OR", "97330", "123128", "dichotomy.com", NULL, "17123", 5.0, 3.5);
+INSERT INTO `Restaurants`VALUES (NULL, "Grassy Hills", "123 Vegan Drive", "Corvallis", "97330", "OR", "1200734", "ethicalEating.com", NULL, "19341123", 1.0, 4.5);
+INSERT INTO `Restaurants`VALUES (NULL, "Porter Steakhouse", "123 Cow Drive", "Corvallis", "97330", "OR", "12312388", "porterSteaks.com", NULL, "55123", 4.0, 5.0);
+INSERT INTO `Restaurants`VALUES (NULL, "All Scrambled Up", "123 Breakfast Drive", "Corvallis", "OR", "97330", "8831234", "eatMoreEggs.com", NULL, "1299993", 3.5, 2.0);
+UNLOCK TABLES;
 
 
 
