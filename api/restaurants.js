@@ -11,7 +11,7 @@ const validation = require('../lib/validation');
 /*
  * Schema describing required/optional fields of a business object.
  */
-const hotelSchema = {
+const restaurantSchema = {
   name: { required: true },
   address: { required: true },
   city: { required: true },
@@ -25,10 +25,10 @@ const hotelSchema = {
   cost: { required: false }
 };
 
-/////////////////////////////////////////////////////////////////// GET HOTELS
-function getHotels(mysqlPool) {
+///////////////////////////////////// GET RESTAURANTS
+function getRestaurants(mysqlPool) {
   return new Promise( (resolve, reject) => {
-    mysqlPool.query('SELECT * FROM Hotels',
+    mysqlPool.query('SELECT * FROM Restaurants',
                     function(err, result) {
                         if(err) { reject(err); }
                         else    { resolve(result); }
@@ -39,28 +39,28 @@ function getHotels(mysqlPool) {
 router.get('/', rateLimit, function (req, res, next) {
   const mysqlPool = req.app.locals.mysqlPool;
 
-  getHotels(mysqlPool)
-    .then( (hotels) => {
-      if(hotels) { res.status(200).json(hotels); }
+  getRestaurants(mysqlPool)
+    .then( (restaurants) => {
+      if(restaurants) { res.status(200).json(restaurants); }
       else       { next(); }
     })
     .catch((err) => {
       res.status(500).json({
-        error: "Unable to fetch hotels.  Please try again later."
+        error: "Unable to fetch restaurants.  Please try again later."
       });
     });
 });
-/////////////////////////////////////////////////////////////////// GET HOTELS
+///////////////////////////////////// GET RESTAURANTS
 
-/////////////////////////////////////////////////////////////////// INSERT HOTELS
-function insertHotel(mysqlPool, hotel) {
+/////////////////////////////////////////////////////////////////// INSERT RESTAURANTS
+function insertRestaurant(mysqlPool, restaurant) {
   return new Promise( (resolve, reject) => {
 
-    hotel.id = null;
-    hotel.rating = null;
-    hotel.cost = null;
+    restaurant.id = null;
+    restaurant.rating = null;
+    restaurant.cost = null;
 
-    mysqlPool.query('INSERT INTO Hotels SET ?', [ hotel ],
+    mysqlPool.query('INSERT INTO Restaurants SET ?', [ restaurant ],
                     function(err, result) {
                       if(err) { reject(err); }
                       else    { resolve(result.insertID); }
@@ -72,46 +72,34 @@ router.post('/', rateLimit, requireAuthentication, function(req, res, next) {
   const mysqlPool = req.app.locals.mysqlPool;
 
   if (req.user !== req.body.ownerid) {
-    res.status(403).json({
-      error: "Unauthorized to access to post under that ownerid, use your own(Make sure you entered your token)"
-    });
+    res.status(403).json({ error: "Unauthorized to access to post under that ownerid, use your own(Make sure you entered your token)"});
   }
   else {
-    if( validation.validateAgainstSchema(req.body, hotelSchema) ) {
-      insertHotel(mysqlPool, req.body)
+    if( validation.validateAgainstSchema(req.body, restaurantSchema) ) {
+      insertRestaurant(mysqlPool, req.body)
         .then( (id) => {
           res.status(201).json({
             id: id,
-            links: {
-              hotel: `/hotels/${id}`
-            }
+            links: { restaurant: `/restaurants/${id}`}
           });
         })
         .catch( (err) => {
           console.log("err ", err);
-          res.status(500).json({
-
-            error: "Error inserting hotel into DB.  Please try again later."
-          });
+          res.status(500).json({ error: "Error inserting restaurant into DB.  Please try again later." });
         });
     }
     else {
-      res.status(400).json({
-        error: "Request body is not a valid hotel object."
-      });
+      res.status(400).json({ error: "Request body is not a valid restaurant object." });
     }
   }
 });
-/////////////////////////////////////////////////////////////////// INSERT HOTELS
+/////////////////////////////////////////////////////////////////// INSERT RESTAURANTS
 
-
-
-
-/////////////////////////////////////////////////////////////////// UPDATE HOTELS
-function updateHotel(mysqlPool, hotel, hotelID, ownerid) {
+/////////////////////////////////////////////////////////////////// UPDATE RestaurantS
+function updateRestaurant(mysqlPool, restaurant, restaurantID, ownerid) {
 
   return new Promise( (resolve, reject) => {
-    mysqlPool.query('UPDATE Hotels SET ? WHERE id = ? AND ownerid = ?', [ hotel, hotelID, ownerid ],
+    mysqlPool.query('UPDATE Restaurants SET ? WHERE id = ? AND ownerid = ?', [ restaurant, restaurantID, ownerid ],
                     function(err, result) {
                       if(err) { reject(err); }
                       else    { resolve(result.affectedRows > 0); }
@@ -119,10 +107,10 @@ function updateHotel(mysqlPool, hotel, hotelID, ownerid) {
   });
 }
 
-router.put('/:user/:hotelID', rateLimit, requireAuthentication, function(req, res, next) {
+router.put('/:user/:restaurantID', rateLimit, requireAuthentication, function(req, res, next) {
   const mysqlPool = req.app.locals.mysqlPool;
 
-  var hotelID = parseInt(req.params.hotelID);
+  var restaurantID = parseInt(req.params.restaurantID);
   var userID = req.params.user;
 
   if (req.user !== userID) {
@@ -131,35 +119,32 @@ router.put('/:user/:hotelID', rateLimit, requireAuthentication, function(req, re
     });
   }
   else {
-    if( validation.validateAgainstSchema(req.body, hotelSchema) ) {
+    if( validation.validateAgainstSchema(req.body, restaurantSchema) ) {
       req.body.ownerid = req.user;
-      updateHotel(mysqlPool, req.body, hotelID, userID)
+      updateRestaurant(mysqlPool, req.body, restaurantID, userID)
         .then( (updateSuccesful) => {
           if(updateSuccesful) {
-            res.status(200).json({ links: { hotel: `/hotels/${hotelID}` } });
+            res.status(200).json({ links: { restaurant: `/restaurants/${restaurantID}` } });
           }
         })
         .catch( (err) => {
           console.log("err: ", err);
-          res.status(500).json({ error: "Error inserting hotel into DB.  Please try again later." });
+          res.status(500).json({ error: "Error inserting restaurant into DB.  Please try again later." });
         });
     }
     else {
       res.status(400).json({
-        error: "Request body is not a valid hotel object."
+        error: "Request body is not a valid restaurant object."
       });
     }
   }
 });
-/////////////////////////////////////////////////////////////////// UPDATE HOTELS
+/////////////////////////////////////////////////////////////////// UPDATE RestaurantS
 
-
-
-
-/////////////////////////////////////////////////////////////////// DELETE HOTELS
-function deleteHotel(mysqlPool, hotelID, ownerid) {
+/////////////////////////////////////////////////////////////////// DELETE RestaurantS
+function deleteRestaurant(mysqlPool, restaurantID, ownerid) {
   return new Promise( (resolve, reject) => {
-    mysqlPool.query('DELETE FROM Hotels WHERE id = ? and ownerid = ?', [ hotelID, ownerid ],
+    mysqlPool.query('DELETE FROM Restaurants WHERE id = ? and ownerid = ?', [ restaurantID, ownerid ],
                     function(err, result) {
                       if(err) { reject(err); }
                       else    { resolve(result.affectedRows > 0); }
@@ -167,11 +152,11 @@ function deleteHotel(mysqlPool, hotelID, ownerid) {
   });
 }
 
-router.delete('/:user/:hotelID', rateLimit, requireAuthentication, function( req, res, next) {
+router.delete('/:user/:restaurantID', rateLimit, requireAuthentication, function( req, res, next) {
   const mysqlPool = req.app.locals.mysqlPool;
 
   var userID = req.params.user;
-  var hotelID = parseInt(req.params.hotelID);
+  var restaurantID = parseInt(req.params.restaurantID);
 
   if (req.user !== userID) {
     res.status(403).json({
@@ -179,19 +164,19 @@ router.delete('/:user/:hotelID', rateLimit, requireAuthentication, function( req
     });
   }
   else {
-    deleteHotel(mysqlPool, hotelID, userID)
+    deleteRestaurant(mysqlPool, restaurantID, userID)
       .then( (deleteSuccessful) => {
         if (deleteSuccessful) { res.status(204).end(); }
         else { next(); }
       })
       .catch( (err) => {
         res.status(500).json({
-          error: "Unable to delete hotel.  Please try again later."
+          error: "Unable to delete restaurant.  Please try again later."
         });
       });
   }
 });
-/////////////////////////////////////////////////////////////////// DELETE HOTELS
+/////////////////////////////////////////////////////////////////// DELETE RestaurantS
 
 
 exports.router = router;
